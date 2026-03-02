@@ -9,8 +9,9 @@ const AI_CONFIG = {
     // Using the new, supported Hugging Face router endpoint
     model: "mistralai/Mistral-7B-Instruct-v0.3", 
     endpoint: "https://router.huggingface.co/v1/chat/completions",
-    // NOTE: Replace this with your actual token
-    token: "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" 
+    // Dynamic Token Management via JSONBin (prevents hardcoded secrets)
+    keySource: "https://api.jsonbin.io/v3/b/69a6011aae596e708f58e218",
+    token: "" // Loaded dynamically from keySource
 };
 
 const APPRAISER_SYSTEM_PROMPT = `
@@ -24,12 +25,37 @@ Refer to Discord: https://discord.gg/DGTMnG9avc
 
 const AI = {
     isChatOpen: false,
+    isRefreshing: false,
+
+    /**
+     * Fetches the latest API key from JSONBin to prevent manual update needs
+     */
+    async refreshApiKey() {
+        if (this.isRefreshing) return;
+        this.isRefreshing = true;
+        try {
+            const response = await fetch(AI_CONFIG.keySource, {
+                headers: { "X-Bin-Meta": "false" }
+            });
+            const data = await response.json();
+            if (data.api_key) {
+                AI_CONFIG.token = data.api_key;
+                console.log("AI: Token Refreshed Successfully");
+            }
+        } catch (err) {
+            console.error("AI: Token Refresh Failed", err);
+        } finally {
+            this.isRefreshing = false;
+        }
+    },
 
     toggleChat() {
         const modal = document.getElementById('aiChatModal');
         this.isChatOpen = !this.isChatOpen;
         if (this.isChatOpen) {
             modal.classList.remove('hidden-modal');
+            // Refresh key on open to ensure it's fresh
+            this.refreshApiKey();
             if (document.getElementById('ai-messages').children.length === 0) {
                 this.addMessage("AI", "Hello! I am your Global AI Analyst. How can I help you with the Territorial market?");
             }
@@ -66,6 +92,16 @@ const AI = {
         const text = input.value.trim();
         if (!text) return;
 
+        // If token is missing, attempt to fetch it before sending
+        if (!AI_CONFIG.token) {
+            this.addMessage("AI", "Initializing secure connection... please wait.");
+            await this.refreshApiKey();
+            if (!AI_CONFIG.token) {
+                this.addMessage("AI", "Could not establish a secure connection. Please try again in a moment.");
+                return;
+            }
+        }
+
         this.addMessage("User", text);
         input.value = '';
 
@@ -78,7 +114,7 @@ const AI = {
                 context = `[Context: Currently analyzing ${user}, Worth ${currentWorth}, Gold ${gold}] `;
             }
 
-            const response = await fetch(AI_CONFIG.endpoint, {
+            let response = await fetch(AI_CONFIG.endpoint, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -94,6 +130,27 @@ const AI = {
                     temperature: 0.7
                 })
             });
+
+            // Handle token expiration/errors by refreshing once
+            if (response.status === 401 || response.status === 403) {
+                await this.refreshApiKey();
+                response = await fetch(AI_CONFIG.endpoint, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${AI_CONFIG.token}`
+                    },
+                    body: JSON.stringify({
+                        model: AI_CONFIG.model,
+                        messages: [
+                            { role: "system", content: APPRAISER_SYSTEM_PROMPT },
+                            { role: "user", content: context + text }
+                        ],
+                        max_tokens: 300,
+                        temperature: 0.7
+                    })
+                });
+            }
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
