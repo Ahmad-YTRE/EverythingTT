@@ -10,7 +10,7 @@ const AI_CONFIG = {
     model: "mistralai/Mistral-7B-Instruct-v0.3", 
     endpoint: "https://router.huggingface.co/v1/chat/completions",
     // NOTE: Replace this with your actual token
-    token: "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" 
+    token: "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" 
 };
 
 const APPRAISER_SYSTEM_PROMPT = `
