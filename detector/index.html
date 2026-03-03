@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Testing & Detection Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Security Detection Dashboard</h1>
+            <p>Monitor and detect browser-level interactions and environment states.</p>
+        </header>
+
+        <main class="dashboard">
+            <!-- Detection Cards -->
+            <section class="card" id="card-devtools">
+                <div class="card-header">
+                    <span class="icon">🔍</span>
+                    <h3>DevTools / Debugging</h3>
+                </div>
+                <div class="status" id="status-devtools">Checking...</div>
+                <p class="description">Detects if browser developer tools are open or if debugging is active.</p>
+            </section>
+
+            <section class="card" id="card-incognito">
+                <div class="card-header">
+                    <span class="icon">🕵️</span>
+                    <h3>Incognito Mode</h3>
+                </div>
+                <div class="status" id="status-incognito">Checking...</div>
+                <p class="description">Detects if the browser is running in private or incognito mode.</p>
+            </section>
+
+            <section class="card" id="card-clicks">
+                <div class="card-header">
+                    <span class="icon">🖱️</span>
+                    <h3>Click Monitoring</h3>
+                </div>
+                <div class="status" id="status-clicks">0 Clicks</div>
+                <p class="description">Tracks mouse click interactions within the page.</p>
+            </section>
+
+            <section class="card" id="card-contextmenu">
+                <div class="card-header">
+                    <span class="icon">📋</span>
+                    <h3>Context Menu</h3>
+                </div>
+                <div class="status" id="status-contextmenu">No action</div>
+                <p class="description">Monitors right-click (context menu) attempts.</p>
+            </section>
+
+            <section class="card" id="card-shortcuts">
+                <div class="card-header">
+                    <span class="icon">⌨️</span>
+                    <h3>Shortcuts (F12/Ctrl+Shift+I)</h3>
+                </div>
+                <div class="status" id="status-shortcuts">No action</div>
+                <p class="description">Detects usage of common inspection keyboard shortcuts.</p>
+            </section>
+
+            <section class="card" id="card-focus">
+                <div class="card-header">
+                    <span class="icon">👁️</span>
+                    <h3>Window Focus</h3>
+                </div>
+                <div class="status" id="status-focus">Focused</div>
+                <p class="description">Detects if the window is currently focused or hidden (blur).</p>
+            </section>
+        </main>
+
+        <section class="event-log">
+            <h2>Activity Log</h2>
+            <div id="log-container" class="log-container">
+                <div class="log-entry system">System initialized...</div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
