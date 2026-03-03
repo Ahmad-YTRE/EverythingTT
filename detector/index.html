@@ -168,14 +168,17 @@
                 </div>
                 
                 <div class="description" style="margin-top:1rem; padding:1rem; background:#f1f5f9; border-radius:8px; border:1px dashed var(--primary-color);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                        <strong style="font-size:0.85rem;">Automated Security Agent</strong>
-                        <button onclick="copyUserScript()" style="padding:4px 8px; font-size:0.7rem; background:var(--primary-color); color:white; border:none; border-radius:4px; cursor:pointer;">Copy UserScript</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <strong style="font-size:0.85rem;">Global Security Agent</strong>
+                        <div style="display:flex; gap:0.5rem;">
+                            <button onclick="openScriptModal()" style="padding:6px 12px; font-size:0.75rem; background:var(--secondary-color); color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">View Script</button>
+                            <a href="https://greasyfork.org/en/scripts/568241-everythingtt-security-agent" target="_blank" style="padding:6px 12px; font-size:0.75rem; background:#10b981; color:white; border:none; border-radius:4px; cursor:pointer; text-decoration:none; font-weight:bold;">Install from GreasyFork</a>
+                        </div>
                     </div>
-                    <pre id="userscript-code" style="background:#fff; padding:8px; border:1px solid #ddd; border-radius:4px; overflow:x-auto; white-space:pre-wrap; font-size:0.65rem; max-height:80px; font-family: 'Fira Code', monospace;"></pre>
+                    <p style="font-size:0.75rem; opacity:0.8; margin-bottom:0.75rem;">For automatic cross-site monitoring, install the EverythingTT Security Agent using a UserScript manager like Tampermonkey.</p>
                     <div style="margin-top:0.75rem; display:flex; align-items:center; gap:0.75rem;">
                         <a id="bookmarklet-link" href="#" style="flex:1; text-align:center; color:var(--primary-color); text-decoration:none; font-weight:bold; padding:8px; border:2px solid var(--primary-color); border-radius:6px; background:white; font-size:0.8rem;">Drag Bookmarklet to Bar</a>
-                        <span style="font-size:0.7rem; flex:1; opacity:0.8;">Or click it on any site to inject.</span>
+                        <span style="font-size:0.7rem; flex:1; opacity:0.8;">Or click it on any site for manual injection.</span>
                     </div>
                 </div>
 
@@ -199,5 +202,19 @@
     <script src="script.js"></script>
     <!-- Hidden iframe for cross-site demonstration -->
     <iframe id="security-context-iframe" style="display:none;" srcdoc="<html><body><script>window.addEventListener('message', (e) => { if(e.data.type === 'TRIGGER_BROADCAST') { window.parent.postMessage({type: 'SECURITY_MONITOR', message: e.data.message}, '*'); } });</script></body></html>"></iframe>
+
+    <!-- Script View Modal -->
+    <div id="script-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:100000; align-items:center; justify-content:center;">
+        <div style="background:white; width:90%; max-width:800px; border-radius:12px; padding:2rem; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+            <h2 style="margin-bottom:1rem; color:var(--header-bg);">EverythingTT Security Agent</h2>
+            <p style="font-size:0.85rem; margin-bottom:1rem; color:var(--secondary-color);">Copy this script into your UserScript manager (Tampermonkey, Greasemonkey, etc.) for local research.</p>
+            <pre id="modal-userscript-code" style="background:#f1f5f9; padding:1.5rem; border-radius:8px; overflow:auto; max-height:400px; font-size:0.75rem; font-family:'Fira Code', monospace; border:1px solid #e2e8f0;"></pre>
+            <div style="margin-top:1.5rem; display:flex; justify-content:flex-end; gap:1rem;">
+                <button onclick="copyModalScript(this)" style="padding:10px 20px; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Copy to Clipboard</button>
+                <button onclick="closeScriptModal()" style="padding:10px 20px; background:#e2e8f0; color:var(--text-color); border:none; border-radius:6px; cursor:pointer; font-weight:600;">Close</button>
+            </div>
+            <button onclick="closeScriptModal()" style="position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; font-size:1.5rem; cursor:pointer; opacity:0.5;">&times;</button>
+        </div>
+    </div>
 </body>
 </html>

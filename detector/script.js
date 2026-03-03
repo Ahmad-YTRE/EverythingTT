@@ -675,6 +675,7 @@ function injectMonitoringBanner(message) {
 }
 
 let remoteTargetWindow = null;
+let generatedUserScript = '';
 
 function openRemoteTarget() {
     const remoteUrl = `data:text/html;charset=utf-8,${encodeURIComponent(`
@@ -759,7 +760,7 @@ function openRemoteTarget() {
                         
                         const overlay = document.createElement('div');
                         overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:#ef4444;color:white;text-align:center;padding:15px;font-weight:bold;z-index:9999;box-shadow:0 4px 10px rgba(0,0,0,0.3);font-family:sans-serif;text-transform:uppercase;';
-                        overlay.innerHTML = '⚠️ EVERYTHINGTT SECURITY ALERT: ' + event.data.message;
+                        overlay.innerHTML = '⚠️ EVERYTHINGTT SECURITY ALERT: ' + event.data.message + ' <span style="margin-left:20px; cursor:pointer; text-decoration:underline;" onclick="this.parentElement.remove()">Dismiss</span>';
                         document.body.prepend(overlay);
                         report('alert_received');
                     }
@@ -829,6 +830,14 @@ window.onload = () => {
     setInterval(checkLiveSessions, 3000); // Poll for remote monitored sessions
     window.addEventListener('resize', detectDevTools);
     detectDevTools();
+
+    // Close modal on outside click
+    window.onclick = (event) => {
+        const modal = document.getElementById('script-modal');
+        if (event.target === modal) {
+            closeScriptModal();
+        }
+    };
 };
 
 function initializeAgentLinks() {
@@ -843,7 +852,7 @@ function initializeAgentLinks() {
         const o = document.createElement('div');
         o.id = i;
         o.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:#ef4444;color:white;text-align:center;padding:10px;font-weight:bold;z-index:999999;box-shadow:0 2px 10px rgba(0,0,0,0.3);font-family:sans-serif;text-transform:uppercase;';
-        o.innerHTML = '⚠️ EVERYTHINGTT SECURITY SYSTEM: THIS SITE IS BEING MONITORED BY THE CENTRAL RESEARCH CENTER';
+        o.innerHTML = '⚠️ EVERYTHINGTT SECURITY SYSTEM: THIS SITE IS BEING MONITORED BY THE CENTRAL RESEARCH CENTER <span style="margin-left:20px; cursor:pointer; text-decoration:underline;" onclick="this.parentElement.remove()">Dismiss</span>';
         document.body.prepend(o);
         
         report();
@@ -861,17 +870,32 @@ function initializeAgentLinks() {
         bookmarkletLink.href = `javascript:${agentCodeMinified}`;
     }
 
-    const userscriptPre = document.getElementById('userscript-code');
-    if (userscriptPre) {
-        userscriptPre.textContent = `// ==UserScript==\n// @name EverythingTT Security Agent\n// @match *://*/*\n// @grant none\n// ==/UserScript==\n\n${agentCodeRaw.replace('void(0);', '')}`;
+    // Store for modal view
+    generatedUserScript = `// ==UserScript==\n// @name EverythingTT Security Agent\n// @match *://*/*\n// @grant none\n// ==/UserScript==\n\n${agentCodeRaw.replace('void(0);', '')}`;
+}
+
+function openScriptModal() {
+    const modal = document.getElementById('script-modal');
+    const pre = document.getElementById('modal-userscript-code');
+    if (modal && pre) {
+        pre.textContent = generatedUserScript;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
     }
 }
 
-function copyUserScript() {
-    const pre = document.getElementById('userscript-code');
-    if (pre) {
+function closeScriptModal() {
+    const modal = document.getElementById('script-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+function copyModalScript(btn) {
+    const pre = document.getElementById('modal-userscript-code');
+    if (pre && btn) {
         navigator.clipboard.writeText(pre.textContent);
-        const btn = event.target;
         const originalText = btn.textContent;
         btn.textContent = 'Copied!';
         setTimeout(() => btn.textContent = originalText, 2000);
