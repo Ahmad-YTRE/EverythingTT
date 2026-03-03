@@ -602,6 +602,66 @@ async function checkDesktopScanner() {
     }
 }
 
+// 14. Cross-Site DOM Message Injection & Monitoring
+function setupCrossSiteMonitoring() {
+    window.addEventListener('message', (event) => {
+        // In a real exploit scenario, this might be unvalidated. 
+        // Here, we demonstrate monitoring it for security state indication.
+        if (event.data && event.data.type === 'SECURITY_MONITOR') {
+            const statusInjection = document.getElementById('status-injection');
+            if (statusInjection) {
+                statusInjection.textContent = 'MONITORED';
+                statusInjection.className = 'status negative';
+            }
+            
+            logActivity(`Cross-Site message received from ${event.origin || 'local'}: ${event.data.message}`, 'alert');
+            injectMonitoringBanner(event.data.message);
+        }
+    });
+}
+
+function injectMonitoringBanner(message) {
+    // Check if it already exists
+    if (document.getElementById('monitoring-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'monitoring-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: #ef4444;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        font-weight: bold;
+        z-index: 9999;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        font-family: sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    `;
+    overlay.innerHTML = `⚠️ SECURITY SYSTEM: ${message} <span style="margin-left:20px; cursor:pointer; text-decoration:underline;" onclick="this.parentElement.remove()">Dismiss</span>`;
+    document.body.prepend(overlay);
+}
+
+// Function to simulate a cross-site injection (for demonstration)
+function simulateCrossSiteInjection() {
+    const statusInjection = document.getElementById('status-injection');
+    if (statusInjection) {
+        statusInjection.textContent = 'INJECTING...';
+        statusInjection.className = 'status neutral';
+    }
+
+    setTimeout(() => {
+        window.postMessage({
+            type: 'SECURITY_MONITOR',
+            message: 'ATTENTION: THIS USER IS CURRENTLY BEING MONITORED BY THE SECURITY SYSTEM'
+        }, '*');
+    }, 500);
+}
+
 // Initial Checks
 window.onload = () => {
     logActivity('Security Dashboard Started', 'system');
@@ -612,6 +672,7 @@ window.onload = () => {
     detectHardware();
     killConsole();
     checkDesktopScanner();
+    setupCrossSiteMonitoring();
 
     // DevTools check and kill loop
     setInterval(detectDevTools, 2000);
