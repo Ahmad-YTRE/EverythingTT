@@ -219,8 +219,11 @@
                 </div>
 
                 <div class="description" style="margin-top:1rem; padding:0.5rem; background:#fff1f2; border-radius:6px; font-size:0.75rem; border:1px solid #fecaca;">
-                    <strong>Live Monitored Sessions:</strong>
-                    <ul id="live-sessions-list" class="info-list" style="max-height:100px; overflow-y:auto; padding-left:0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <strong>Live Monitored Sessions:</strong>
+                        <button onclick="clearLiveSessions()" style="padding:2px 6px; font-size:0.6rem; background:none; border:1px solid #fecaca; color:#ef4444; border-radius:4px; cursor:pointer;">Clear All</button>
+                    </div>
+                    <ul id="live-sessions-list" class="info-list" style="max-height:150px; overflow-y:auto; padding-left:0; list-style:none;">
                         <li>Waiting for remote sessions...</li>
                     </ul>
                 </div>

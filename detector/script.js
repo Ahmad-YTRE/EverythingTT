@@ -717,16 +717,43 @@ async function checkLiveSessions() {
                 sessionList.innerHTML = '';
                 sessions.forEach(s => {
                     const li = document.createElement('li');
-                    li.style.cssText = 'border-bottom: 1px solid #fee2e2; padding: 4px 0;';
-                    li.innerHTML = `🌍 <span style="color:#ef4444; font-weight:bold;">${s.host}</span> <small style="opacity:0.6;">[${s.time_str}]</small>`;
+                    li.style.cssText = 'border-bottom: 1px solid #fee2e2; padding: 8px 0; display: flex; flex-direction: column; gap: 2px;';
+                    
+                    // Format event indicator
+                    let eventIcon = '📡';
+                    if (s.last_event === 'click') eventIcon = '🖱️';
+                    if (s.last_event === 'keydown') eventIcon = '⌨️';
+                    if (s.last_event === 'agent_active') eventIcon = '✅';
+
+                    li.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:bold; color:#1e293b; font-size:0.8rem;">🌍 ${s.host}</span>
+                            <span style="font-size:0.65rem; opacity:0.5;">${s.last_time_str}</span>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center; font-size:0.7rem;">
+                            <span style="background:#fee2e2; color:#ef4444; padding:1px 4px; border-radius:3px; font-weight:600;">${eventIcon} ${s.last_event.toUpperCase()}</span>
+                            <span style="opacity:0.6;">Events: ${s.events}</span>
+                            <span style="opacity:0.4; font-size:0.6rem;">SID: ${s.sid}</span>
+                        </div>
+                    `;
                     sessionList.appendChild(li);
                 });
             } else {
-                sessionList.innerHTML = '<li>No active remote sessions</li>';
+                sessionList.innerHTML = '<li style="opacity:0.5; font-style:italic; padding:10px 0;">No active remote sessions</li>';
             }
         }
     } catch (e) {
-        sessionList.innerHTML = '<li>C2 Server Offline</li>';
+        sessionList.innerHTML = '<li style="color:#ef4444; font-weight:bold;">C2 Server Offline</li>';
+    }
+}
+
+async function clearLiveSessions() {
+    try {
+        await fetch('http://localhost:8001/clear_sessions');
+        checkLiveSessions();
+        logActivity('Live monitored sessions cleared', 'system');
+    } catch (e) {
+        console.error('Failed to clear sessions:', e);
     }
 }
 

