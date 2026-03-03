@@ -13,6 +13,11 @@
         <header>
             <h1>EverythingTT Security Research Center</h1>
             <p>Official research hub for the EverythingTT project security system. Monitor, detect, and analyze browser-level interactions and environment states.</p>
+            <div style="margin-top:1.5rem; display:flex; justify-content:center; gap:1.5rem; font-size:0.85rem;">
+                <a href="#dev-guide" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Developer Guide</a>
+                <a href="SECURITY.md" target="_blank" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Security Policy</a>
+                <a href="#card-injection" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Deployment Agent</a>
+            </div>
         </header>
 
         <main class="dashboard">
@@ -191,7 +196,31 @@
             </section>
         </main>
 
-        <section class="event-log">
+        <!-- Developer Guide Section -->
+        <section id="dev-guide" class="event-log" style="margin-top:2rem;">
+            <h2>EverythingTT Developer Guide</h2>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:2rem; margin-top:1.5rem;">
+                <div>
+                    <h3 style="color:var(--primary-color); font-size:1.1rem; margin-bottom:0.75rem;">Architecture Overview</h3>
+                    <p style="font-size:0.85rem; color:var(--secondary-color); line-height:1.6;">EverythingTT operates on a <b>Distributed Monitoring</b> model. The central Research Dashboard communicates with local <b>C2 Agents</b> (Python) to scan for desktop automation, while <b>Remote Security Agents</b> (UserScripts) report site-specific activity back to the dashboard via standard <code>postMessage</code> and <code>fetch</code> APIs.</p>
+                </div>
+                <div>
+                    <h3 style="color:var(--primary-color); font-size:1.1rem; margin-bottom:0.75rem;">Deployment Workflow</h3>
+                    <ol style="font-size:0.85rem; color:var(--secondary-color); line-height:1.6; padding-left:1.25rem;">
+                        <li>Start the C2 Backend: <code>python detector.py</code></li>
+                        <li>Install the <a href="https://greasyfork.org/en/scripts/568241-everythingtt-security-agent" target="_blank" style="color:var(--primary-color);">Global Agent</a> via GreasyFork.</li>
+                        <li>Monitor real-time interactions in the <b>Live Monitored Sessions</b> card.</li>
+                        <li>Simulate alerts via <b>Cross-Site Broadcasts</b>.</li>
+                    </ol>
+                </div>
+                <div>
+                    <h3 style="color:var(--primary-color); font-size:1.1rem; margin-bottom:0.75rem;">Contributing</h3>
+                    <p style="font-size:0.85rem; color:var(--secondary-color); line-height:1.6;">Researchers can contribute by adding new detection modules to <code>script.js</code>. Key areas for development include <b>Enhanced Fingerprinting</b>, <b>Bot Detection Heuristics</b>, and <b>Advanced Anti-Debugging</b> techniques.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="event-log" style="margin-top:2rem;">
             <h2>Activity Log</h2>
             <div id="log-container" class="log-container">
                 <div class="log-entry system">System initialized...</div>
