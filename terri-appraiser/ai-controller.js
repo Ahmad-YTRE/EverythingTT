@@ -46,13 +46,12 @@ CORE KNOWLEDGE:
 MISSION:
 Provide insights on account scans, predict market trends, and explain why certain accounts are valued higher. 
 Always refer to the Territorial.io Discord (https://discord.gg/DGTMnG9avc) for auction verification.
-Be professional, tracking-oriented, and helpful to the community.
 
-RESPONSE STYLE:
-- Use **bullet points** for lists and statistics.
-- Use **bold text** for important numbers, names, or terms.
-- Keep paragraphs short and readable.
-- Be structured and organized.
+RESPONSE GUIDELINES:
+1. **Be Thorough but Concise**: Provide detailed analysis when asked, but avoid unnecessary filler.
+2. **Context Awareness**: Use the provided [CURRENT SCAN CONTEXT] to give specific advice about the account currently being analyzed.
+3. **Structured Data**: Always use **bolding** and **bullet points** to organize statistics and market rates.
+4. **Professional Tone**: Maintain a helpful, analytical, and professional demeanor.
 
 NEW AI CAPABILITIES:
 - If a user asks to scan or appraise an account, you can automatically handle the credentials.
@@ -70,6 +69,8 @@ AI: "I don't see any personal credentials, but don't worry! I'll use the **Share
 const AI = {
     isChatOpen: false,
     isRefreshing: false,
+    messageHistory: [], // NEW: Persistent conversation history for context
+    maxHistory: 10,     // Keep last 10 messages for context window optimization
 
     /**
      * AI SKILL: Automatically handles the credential-to-fetch flow
@@ -158,7 +159,8 @@ const AI = {
     clearChat() {
         const container = document.getElementById('ai-messages');
         container.innerHTML = '';
-        this.addMessage("AI", "Chat history cleared. How can I help you now?");
+        this.messageHistory = []; // Reset history
+        this.addMessage("AI", "Chat history cleared. Context window has been reset. How can I help you now?");
     },
 
     quickAction(action) {
@@ -167,9 +169,9 @@ const AI = {
             const user = document.getElementById('api-username').value || "your account";
             input.value = `Scan account ${user}`;
         } else if (action === "Analyze Market") {
-            input.value = "Give me a brief overview of the current market rates.";
+            input.value = "Briefly analyze the current market for me.";
         } else if (action === "Explain Rates") {
-            input.value = "How are the USD values calculated for Gold and ETT?";
+            input.value = "How are USD values calculated for Gold/ETT?";
         }
         this.sendMessage();
     },
@@ -179,6 +181,12 @@ const AI = {
         const msgDiv = document.createElement('div');
         msgDiv.className = `chat-bubble ${sender === "AI" ? "bubble-ai" : "bubble-user"}`;
         
+        // Update history (internal representation for context window)
+        this.messageHistory.push({ role: sender === "AI" ? "assistant" : "user", content: text });
+        if (this.messageHistory.length > this.maxHistory) {
+            this.messageHistory.shift(); // Remove oldest to maintain context window size
+        }
+
         // Simple Markdown-like formatting for AI
         let formattedText = text;
         if (sender === "AI") {
@@ -259,7 +267,7 @@ const AI = {
                 }
             }
 
-            let context = "";
+            let liveContext = "";
             const currentWorth = document.getElementById('res-val').innerText;
             if (currentWorth !== "$0.00") {
                 const user = document.getElementById('res-user').innerText;
@@ -268,8 +276,16 @@ const AI = {
                 const goldRank = document.getElementById('res-gold-rank-val').innerText;
                 const leaderPts = document.getElementById('res-leader-pts').innerText;
                 
-                context = `[Live Context: Analyzing user "${user}". Stats: Worth ${currentWorth}, Gold Reserve ${gold}, Clan Rank ${clanRank}, Gold Rank ${goldRank}, Leader Points ${leaderPts}] `;
+                liveContext = `[CURRENT SCAN CONTEXT: User "${user}", Worth ${currentWorth}, Gold ${gold}, Clan Rank ${clanRank}, Gold Rank ${goldRank}, Leader Pts ${leaderPts}] `;
             }
+
+            // Build request payload with history and context
+            const requestMessages = [
+                { role: "system", content: APPRAISER_SYSTEM_PROMPT + "\n\n" + liveContext }
+            ];
+            
+            // Add existing history to the prompt for context
+            this.messageHistory.forEach(msg => requestMessages.push(msg));
 
             let response = await fetch(AI_CONFIG.endpoint, {
                 method: 'POST',
@@ -279,12 +295,9 @@ const AI = {
                 },
                 body: JSON.stringify({
                     model: AI_CONFIG.model,
-                    messages: [
-                        { role: "system", content: APPRAISER_SYSTEM_PROMPT },
-                        { role: "user", content: context + text }
-                    ],
-                    max_tokens: 400,
-                    temperature: 0.7
+                    messages: requestMessages,
+                    max_tokens: 600, // INCREASED for more thorough responses
+                    temperature: 0.65 // SLIGHTLY REDUCED for more focused answers
                 })
             });
 
@@ -299,12 +312,9 @@ const AI = {
                     },
                     body: JSON.stringify({
                             model: AI_CONFIG.model,
-                            messages: [
-                                { role: "system", content: APPRAISER_SYSTEM_PROMPT },
-                                { role: "user", content: context + text }
-                            ],
-                            max_tokens: 400,
-                            temperature: 0.7
+                            messages: requestMessages,
+                            max_tokens: 600,
+                            temperature: 0.65
                         })
                 });
             }
