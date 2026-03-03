@@ -575,6 +575,29 @@
         .label-ai { color: #818cf8; }
         .label-user { color: #64748b; }
 
+        /* Typing Indicator Animation */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        .animate-bounce {
+            animation: bounce 0.6s infinite ease-in-out;
+        }
+
+        /* Responsive Modal */
+        @media (max-width: 640px) {
+            #aiChatModal .modal-content {
+                width: 100%;
+                height: 100% !important;
+                max-width: none !important;
+                border-radius: 0;
+            }
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
         }
@@ -888,27 +911,61 @@
 
     <!-- AI CHAT MODAL -->
     <div id="aiChatModal" class="modal-overlay hidden-modal" style="z-index: 150;">
-        <div class="modal-content" style="max-width: 400px; height: 500px;">
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h3 style="font-size: 1.25rem; font-weight: 700; color: white;">Appraiser AI</h3>
-                    <p class="label-tiny" style="color: #64748b;">Powered by Ollama</p>
+        <div class="modal-content" style="max-width: 450px; height: 600px; padding: 0; overflow: hidden; border-radius: 1.5rem;">
+            <!-- Header -->
+            <div class="flex justify-between items-center p-6 border-b border-white/5 bg-slate-900/50">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-500/20 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: white; line-height: 1.2;">Appraiser AI</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <p class="label-tiny" style="color: #64748b; margin: 0; font-size: 7px;">Global Analyst Online</p>
+                        </div>
+                    </div>
                 </div>
-                <button onclick="AI.toggleChat()" class="btn-text p-2" style="border-radius: 9999px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="AI.clearChat()" class="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-500 hover:text-white" title="Clear Chat">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                    <button onclick="AI.toggleChat()" class="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-500 hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
             </div>
             
-            <div id="ai-messages" style="flex: 1; overflow-auto; display: flex; flex-direction: column; padding-right: 0.5rem; margin-bottom: 1rem;" class="custom-scrollbar">
+            <!-- Message Area -->
+            <div id="ai-messages" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 1.5rem; gap: 1rem;" class="custom-scrollbar bg-slate-950/20">
                 <!-- Messages dynamic -->
             </div>
 
-            <div class="flex gap-2">
-                <input type="text" id="ai-input" placeholder="Ask about the market..." 
-                    class="input-text" style="flex: 1;" onkeypress="if(event.key === 'Enter') AI.sendMessage()">
-                <button onclick="AI.sendMessage()" class="btn-primary" style="width: auto; padding: 0.5rem 1rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                </button>
+            <!-- Quick Actions (Hidden by default, shown when empty or relevant) -->
+            <div id="ai-quick-actions" class="flex gap-2 px-6 pb-2 overflow-x-auto custom-scrollbar no-scrollbar" style="scrollbar-width: none;">
+                <button onclick="AI.quickAction('Analyze Market')" class="whitespace-nowrap px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-lg text-[9px] font-bold text-indigo-300 transition-all">Analyze Market</button>
+                <button onclick="AI.quickAction('Scan Me')" class="whitespace-nowrap px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg text-[9px] font-bold text-emerald-300 transition-all">Scan Me</button>
+                <button onclick="AI.quickAction('Explain Rates')" class="whitespace-nowrap px-3 py-1.5 bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/20 rounded-lg text-[9px] font-bold text-pink-300 transition-all">Explain Rates</button>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-6 bg-slate-900/50 border-t border-white/5">
+                <div class="relative flex items-center gap-3">
+                    <div style="flex: 1; position: relative;">
+                        <input type="text" id="ai-input" placeholder="Ask about the market..." 
+                            class="input-text w-full" style="padding: 0.875rem 1rem; border-radius: 1rem; background: var(--bg-deep); border-color: rgba(255,255,255,0.1);" 
+                            onkeypress="if(event.key === 'Enter') AI.sendMessage()">
+                        <div id="ai-typing-indicator" class="hidden absolute right-4 top-1/2 -translate-y-1/2 flex gap-1">
+                            <span class="w-1 h-1 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                            <span class="w-1 h-1 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                            <span class="w-1 h-1 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+                        </div>
+                    </div>
+                    <button onclick="AI.sendMessage()" class="btn-primary" style="width: auto; padding: 0.875rem 1.25rem; border-radius: 1rem; box-shadow: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+                <p class="text-[8px] text-slate-500 mt-3 text-center uppercase tracking-widest font-bold opacity-50">Powered by Llama 3.2 Global Inference</p>
             </div>
         </div>
     </div>

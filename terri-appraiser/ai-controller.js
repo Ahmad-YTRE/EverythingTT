@@ -50,15 +50,15 @@ Be professional, tracking-oriented, and helpful to the community.
 
 NEW AI CAPABILITIES:
 - If a user asks to scan or appraise an account, you can automatically handle the credentials.
-- You can check local storage for credentials and trigger the fetch process.
-- If credentials are missing, politely ask the user to enter them in the login fields.
+- You check local storage for credentials first. 
+- FALLBACK: If credentials are missing, you will automatically suggest and activate the **Shared Community Account (Global API)** to perform the scan.
 
 EXAMPLE INTERACTIONS:
 User: "Scan account 'TopPlayer123'"
 AI: "I'll handle that! I'm checking for your credentials now... I found them in local storage. I'm initiating the scan for 'TopPlayer123' now. Please watch the results area!"
 
 User: "Appraise 'RichGuy'"
-AI: "Sure! Oh, it looks like you haven't entered your credentials yet. Please fill in your Account Name and Password in the 'Account Access' section so I can fetch the data for 'RichGuy'!"
+AI: "I don't see any personal credentials, but don't worry! I'll use the **Shared Community Account (NM972)** to fetch the data for 'RichGuy' instead. Initiating scan now!"
 `;
 
 const AI = {
@@ -94,10 +94,23 @@ const AI = {
              
              return true;
          } else {
-             this.addMessage("AI", "I'm ready to scan, but I don't see any credentials yet! Please enter your <strong>Account Name</strong> and <strong>Password</strong> in the <strong>Account Access</strong> section. Once you're done, just tell me to scan again!");
-             return false;
+             // FALLBACK: Offer to use Global API
+             this.addMessage("AI", `I don't see any personal credentials, but don't worry! I'll use the <strong>Shared Community Account (NM972)</strong> to fetch the data for <strong>${targetAccount}</strong> instead.`);
+             
+             // Programmatically activate Global API (using the logic from index.html)
+             const bannerBtn = document.getElementById('use-global-btn');
+             if (bannerBtn && !isGlobalApiActive) {
+                 bannerBtn.click();
+             }
+             
+             targetField.value = targetAccount;
+             setTimeout(() => {
+                 fetchBtn.click();
+             }, 300); // Small delay to ensure Global API state is updated
+             
+             return true;
          }
-    },
+     },
 
     /**
      * Fetches the latest API key from JSONBin to prevent manual update needs
@@ -136,6 +149,25 @@ const AI = {
         }
     },
 
+    clearChat() {
+        const container = document.getElementById('ai-messages');
+        container.innerHTML = '';
+        this.addMessage("AI", "Chat history cleared. How can I help you now?");
+    },
+
+    quickAction(action) {
+        const input = document.getElementById('ai-input');
+        if (action === "Scan Me") {
+            const user = document.getElementById('api-username').value || "your account";
+            input.value = `Scan account ${user}`;
+        } else if (action === "Analyze Market") {
+            input.value = "Give me a brief overview of the current market rates.";
+        } else if (action === "Explain Rates") {
+            input.value = "How are the USD values calculated for Gold and ETT?";
+        }
+        this.sendMessage();
+    },
+
     addMessage(sender, text) {
         const container = document.getElementById('ai-messages');
         const msgDiv = document.createElement('div');
@@ -148,13 +180,23 @@ const AI = {
         }
         
         container.appendChild(msgDiv);
-        container.scrollTop = container.scrollHeight;
+        
+        // Smooth scroll to bottom
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: 'smooth'
+        });
     },
 
     async sendMessage() {
         const input = document.getElementById('ai-input');
+        const typingIndicator = document.getElementById('ai-typing-indicator');
+        const quickActions = document.getElementById('ai-quick-actions');
         const text = input.value.trim();
         if (!text) return;
+
+        // Hide quick actions once user interacts
+        if (quickActions) quickActions.classList.add('hidden');
 
         // --- NEW: AI INTENT DETECTION (Automated Scan Skill) ---
         const scanRegex = /(?:scan|appraise|check|analyze)\s+(?:account|user)?\s*['"]?([a-zA-Z0-9_\-\s]+)['"]?/i;
@@ -172,20 +214,23 @@ const AI = {
         }
         // --------------------------------------------------------
 
-        // If token is missing, attempt to fetch it before sending
-        if (!AI_CONFIG.token) {
-            this.addMessage("AI", "Initializing secure connection... please wait.");
-            await this.refreshApiKey();
-            if (!AI_CONFIG.token) {
-                this.addMessage("AI", "Could not establish a secure connection. Please try again in a moment.");
-                return;
-            }
-        }
-
         this.addMessage("User", text);
         input.value = '';
 
+        // Show typing indicator
+        if (typingIndicator) typingIndicator.classList.remove('hidden');
+
         try {
+            // If token is missing, attempt to fetch it before sending
+            if (!AI_CONFIG.token) {
+                await this.refreshApiKey();
+                if (!AI_CONFIG.token) {
+                    this.addMessage("AI", "Could not establish a secure connection. Please try again in a moment.");
+                    if (typingIndicator) typingIndicator.classList.add('hidden');
+                    return;
+                }
+            }
+
             let context = "";
             const currentWorth = document.getElementById('res-val').innerText;
             if (currentWorth !== "$0.00") {
@@ -251,6 +296,9 @@ const AI = {
         } catch (err) {
             this.addMessage("AI", "The Global Brain is currently busy or experiencing a connection issue. Error: " + err.message);
             console.error("AI Error:", err);
+        } finally {
+            // Hide typing indicator
+            if (typingIndicator) typingIndicator.classList.add('hidden');
         }
     }
 };
