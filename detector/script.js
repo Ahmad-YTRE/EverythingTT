@@ -197,16 +197,17 @@ async function detectIncognito() {
         }
     }
 
-    // F. StorageManager Persist check
+    // F. StorageManager Persist check (Informational only, not a detection signal)
     if ('storage' in navigator && 'persist' in navigator.storage) {
         try {
             const isPersisted = await navigator.storage.persisted();
             if (!isPersisted) {
-                // Try to persist - this usually fails or is denied in incognito
                 const result = await navigator.storage.persist();
-                if (!result && isIncognito === false) {
-                    // This is not a definitive check on its own, but can be a hint
-                    setIncognito('Storage persistence denied');
+                if (!result) {
+                    // This is common in normal mode if the user or browser denies it
+                    logActivity('Storage persistence denied (not a definitive incognito signal)', 'info');
+                } else {
+                    logActivity('Storage persistence granted', 'info');
                 }
             }
         } catch (e) {}
