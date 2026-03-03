@@ -21,8 +21,8 @@ function killDevTools() {
     if (lockdownActive) return;
 
     const start = performance.now();
-    // Use Function constructor to make it harder to ignore
-    (function() { return false; }['constructor']('debugger')());
+    // Use debugger statement directly to avoid CSP issues with 'unsafe-eval'
+    (function() { debugger; })();
     const end = performance.now();
     
     if (end - start > 100) {
@@ -64,7 +64,7 @@ function detectDevTools() {
 
     // Method 1: Timing check (debugger)
     const startTime = performance.now();
-    (function() { return false; }['constructor']('debugger')());
+    (function() { debugger; })();
     if (performance.now() - startTime > 100) {
         detectedThisRound = true;
     }
@@ -604,7 +604,9 @@ async function checkDesktopScanner() {
 
 // 14. Cross-Site DOM Message Injection & Monitoring
 function setupCrossSiteMonitoring() {
+    console.log("Cross-Site monitoring listener initialized.");
     window.addEventListener('message', (event) => {
+        console.log("Message received:", event.data);
         // In a real exploit scenario, this might be unvalidated. 
         // Here, we demonstrate monitoring it for security state indication.
         if (event.data && event.data.type === 'SECURITY_MONITOR') {
@@ -646,19 +648,75 @@ function injectMonitoringBanner(message) {
     document.body.prepend(overlay);
 }
 
+let remoteTargetWindow = null;
+
+function openRemoteTarget() {
+    const remoteUrl = `data:text/html;charset=utf-8,${encodeURIComponent(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>External Site - Security Target</title>
+            <style>
+                body { font-family: sans-serif; padding: 50px; text-align: center; background: #f8fafc; color: #1e293b; }
+                .box { border: 2px dashed #cbd5e1; padding: 40px; border-radius: 20px; max-width: 600px; margin: 0 auto; }
+                h1 { color: #3b82f6; }
+                #status { margin-top: 20px; font-size: 1.2rem; padding: 15px; background: #fff; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+            </style>
+        </head>
+        <body>
+            <div class="box">
+                <h1>External Website Context</h1>
+                <p>This is a simulated external website that includes the <b>Security Monitoring Agent</b>.</p>
+                <div id="status">Waiting for remote security broadcast...</div>
+            </div>
+            <script>
+                window.addEventListener('message', (event) => {
+                    if (event.data && event.data.type === 'SECURITY_MONITOR') {
+                        document.getElementById('status').innerHTML = '<b style="color:#ef4444; font-size:1.5rem;">🚨 MONITORING DETECTED!</b><br><br>' + event.data.message;
+                        const overlay = document.createElement('div');
+                        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:#ef4444;color:white;text-align:center;padding:15px;font-weight:bold;z-index:9999;box-shadow:0 4px 10px rgba(0,0,0,0.3);font-family:sans-serif;text-transform:uppercase;';
+                        overlay.innerHTML = '⚠️ REMOTE SECURITY ALERT: ' + event.data.message;
+                        document.body.prepend(overlay);
+                    }
+                });
+            </script>
+        </body>
+        </html>
+    `)}`;
+    remoteTargetWindow = window.open(remoteUrl, '_blank', 'width=800,height=600');
+    logActivity('Opened external target window for cross-site monitoring', 'system');
+}
+
 // Function to simulate a cross-site injection (for demonstration)
 function simulateCrossSiteInjection() {
     const statusInjection = document.getElementById('status-injection');
+    const message = 'ATTENTION: THIS USER IS CURRENTLY BEING MONITORED BY THE SECURITY SYSTEM';
+    
     if (statusInjection) {
-        statusInjection.textContent = 'INJECTING...';
+        statusInjection.textContent = 'BROADCASTING...';
         statusInjection.className = 'status neutral';
     }
 
+    // 1. Broadcast to local context (this page)
+    window.postMessage({ type: 'SECURITY_MONITOR', message }, '*');
+
+    // 2. Broadcast to hidden iframe context
+    const iframe = document.getElementById('security-context-iframe');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'TRIGGER_BROADCAST', message }, '*');
+    }
+
+    // 3. Broadcast to remote popup window (if open)
+    if (remoteTargetWindow && !remoteTargetWindow.closed) {
+        remoteTargetWindow.postMessage({ type: 'SECURITY_MONITOR', message }, '*');
+        logActivity('Broadcasted monitoring status to remote target window', 'alert');
+    }
+
     setTimeout(() => {
-        window.postMessage({
-            type: 'SECURITY_MONITOR',
-            message: 'ATTENTION: THIS USER IS CURRENTLY BEING MONITORED BY THE SECURITY SYSTEM'
-        }, '*');
+        if (statusInjection) {
+            statusInjection.textContent = 'MONITORED';
+            statusInjection.className = 'status negative';
+        }
     }, 500);
 }
 
