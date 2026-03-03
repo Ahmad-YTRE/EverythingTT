@@ -101,6 +101,20 @@
                 <p class="description">Monitors for screen capture or camera/mic permission requests.</p>
             </section>
 
+            <!-- Typing Test Card -->
+            <section class="card" id="card-typing">
+                <div class="card-header">
+                    <span class="icon">⌨️</span>
+                    <h3>Typing Monitor</h3>
+                </div>
+                <div class="status" id="status-typing">Waiting...</div>
+                <div class="description">
+                    <p style="margin-bottom:0.75rem;">Test the security system's ability to detect input focus and keyboard activity.</p>
+                    <input type="text" id="typing-test-input" placeholder="Type here to test..." style="width:100%; padding:0.75rem; border:1px solid #e2e8f0; border-radius:8px; font-family:inherit; outline:none; transition:border-color 0.2s;">
+                    <p id="typing-metadata" style="font-size:0.7rem; margin-top:0.5rem; color:var(--secondary-color); font-style:italic;">Target: None</p>
+                </div>
+            </section>
+
             <section class="card" id="card-dom">
                 <div class="card-header">
                     <span class="icon">🏗️</span>

