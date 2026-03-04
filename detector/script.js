@@ -1,5 +1,5 @@
 // Global C2 Configuration
-let C2_URL = localStorage.getItem('everythingtt_c2_url') || 'http://localhost:8001';
+let C2_URL = localStorage.getItem('everythingtt_c2_url') || 'https://kecia-ungreeted-neologically.ngrok-free.dev';
 
 function updateC2Url(newUrl) {
     if (!newUrl) return;
