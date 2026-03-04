@@ -103,6 +103,21 @@ header p {
     justify-content: center;
 }
 
+.card-doc-link {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.card-doc-link:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
 .status {
     font-size: 1.5rem;
     font-weight: 700;
@@ -133,18 +148,22 @@ header p {
 
 .description {
     color: var(--secondary-color);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
 }
 
 .info-list {
-    margin-top: 0.5rem;
-    padding-left: 1.25rem;
-    font-size: 0.8rem;
-    opacity: 0.8;
+    list-style: none;
+    margin-top: 1rem;
 }
 
 .info-list li {
-    margin-bottom: 0.2rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: 0.85rem;
+}
+
+.info-list li:last-child {
+    border-bottom: none;
 }
 
 .event-log {
@@ -163,35 +182,33 @@ header p {
 .log-container {
     height: 300px;
     overflow-y: auto;
-    background: #1e293b;
-    color: #e2e8f0;
-    padding: 1rem;
+    background: #0f172a;
     border-radius: 8px;
-    font-family: 'Fira Code', 'Courier New', monospace;
+    padding: 1rem;
+    font-family: 'Fira Code', monospace;
     font-size: 0.85rem;
 }
 
 .log-entry {
-    margin-bottom: 0.5rem;
+    padding: 0.4rem 0;
     border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding-bottom: 0.25rem;
 }
-
-.log-entry.system { color: #3b82f6; }
-.log-entry.alert { color: #ef4444; }
-.log-entry.info { color: #10b981; }
 
 .log-entry::before {
-    content: '[' attr(data-time) '] ';
-    opacity: 0.6;
+    content: attr(data-time);
+    color: #64748b;
+    margin-right: 1rem;
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
+.log-entry.info { color: #e2e8f0; }
+.log-entry.alert { color: #ef4444; font-weight: 600; }
+.log-entry.system { color: #3b82f6; }
+
+@media (max-width: 768px) {
     .container {
         padding: 1rem;
     }
     header h1 {
-        font-size: 1.75rem;
+        font-size: 2rem;
     }
 }

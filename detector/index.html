@@ -14,7 +14,7 @@
             <h1>EverythingTT Security Research Center</h1>
             <p>Official research hub for the EverythingTT project security system. Monitor, detect, and analyze browser-level interactions and environment states.</p>
             <div style="margin-top:1.5rem; display:flex; justify-content:center; gap:1.5rem; font-size:0.85rem;">
-                <a href="#dev-guide" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Developer Guide</a>
+                <a href="docs.html" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Developer Guide</a>
                 <a href="SECURITY.md" target="_blank" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Security Policy</a>
                 <a href="#card-injection" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Deployment Agent</a>
             </div>
@@ -36,6 +36,7 @@
                         <li>Hardened: Prevents main-thread inspection</li>
                     </ul>
                 </div>
+                <a href="docs.html#devtools" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-incognito">
@@ -52,6 +53,7 @@
                         <li>Form data not saved</li>
                     </ul>
                 </div>
+                <a href="docs.html#incognito" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-clicks">
@@ -61,6 +63,7 @@
                 </div>
                 <div class="status" id="status-clicks">0 Clicks</div>
                 <p class="description">Tracks mouse click interactions within the page.</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-contextmenu">
@@ -70,6 +73,7 @@
                 </div>
                 <div class="status" id="status-contextmenu">No action</div>
                 <p class="description">Monitors right-click (context menu) attempts.</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-shortcuts">
@@ -79,6 +83,7 @@
                 </div>
                 <div class="status" id="status-shortcuts">No action</div>
                 <p class="description">Detects usage of common inspection keyboard shortcuts.</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-focus">
@@ -88,6 +93,7 @@
                 </div>
                 <div class="status" id="status-focus">Focused</div>
                 <p class="description">Detects if the window is currently focused or hidden (blur).</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-screen">
@@ -97,6 +103,7 @@
                 </div>
                 <div class="status" id="status-screen">Stable</div>
                 <p class="description">Detects window resizing or full-screen mode entries.</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-media">
@@ -106,6 +113,7 @@
                 </div>
                 <div class="status" id="status-media">Not active</div>
                 <p class="description">Monitors for screen capture or camera/mic permission requests.</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <!-- Voice Monitor Card -->
@@ -123,6 +131,7 @@
                     </div>
                     <div id="voice-metadata" style="font-size:0.7rem; color:var(--secondary-color); font-style:italic;">No recording stored.</div>
                 </div>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <!-- AI Research & Prompt Injection Card -->
@@ -144,6 +153,7 @@
                         <button onclick="window.location.href='#card-injection'" style="width:100%; padding:0.5rem; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600;">Manage Agents</button>
                     </div>
                 </div>
+                <a href="docs.html#ai" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <!-- End-To-End Encryption (E2EE) Module -->
@@ -165,6 +175,7 @@
                         <div><strong>Decrypted:</strong> <code id="e2ee-plain" style="color:#10b981;"></code></div>
                     </div>
                 </div>
+                <a href="docs.html#e2ee" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <!-- Typing Test Card -->
@@ -179,6 +190,7 @@
                     <input type="text" id="typing-test-input" placeholder="Type here to test..." style="width:100%; padding:0.75rem; border:1px solid #e2e8f0; border-radius:8px; font-family:inherit; outline:none; transition:border-color 0.2s;">
                     <p id="typing-metadata" style="font-size:0.7rem; margin-top:0.5rem; color:var(--secondary-color); font-style:italic;">Target: None</p>
                 </div>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-dom">
@@ -188,6 +200,7 @@
                 </div>
                 <div class="status" id="status-dom">No changes</div>
                 <p class="description">Detects external scripts or extensions injecting HTML elements into the page.</p>
+                <a href="docs.html#dom" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-userscript">
@@ -197,6 +210,7 @@
                 </div>
                 <div class="status" id="status-userscript">Active</div>
                 <p class="description">Neutralizes userscripts by freezing environment globals and blocking injections.</p>
+                <a href="docs.html#agents" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-hardware">
@@ -210,6 +224,7 @@
                         <!-- Populated by JS -->
                     </ul>
                 </div>
+                <a href="docs.html#hardware" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-bypass">
@@ -219,6 +234,7 @@
                 </div>
                 <div class="status" id="status-bypass">Checking...</div>
                 <p class="description">Detects automation tools (Selenium, Puppeteer) and virtualized environments (VMs).</p>
+                <a href="docs.html#hardware" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-desktop-scan">
@@ -238,6 +254,7 @@
                         <!-- Populated by backend API -->
                     </ul>
                 </div>
+                <a href="docs.html#desktop" class="card-doc-link">Technical Docs →</a>
             </section>
 
             <section class="card" id="card-injection">
@@ -276,6 +293,7 @@
                         <li>Waiting for remote sessions...</li>
                     </ul>
                 </div>
+                <a href="docs.html#agents" class="card-doc-link">Technical Docs →</a>
             </section>
         </main>
 
@@ -298,7 +316,7 @@
                 </div>
                 <div>
                     <h3 style="color:var(--primary-color); font-size:1.1rem; margin-bottom:0.75rem;">Contributing</h3>
-                    <p style="font-size:0.85rem; color:var(--secondary-color); line-height:1.6;">Researchers can contribute by adding new detection modules to <code>script.js</code>. Key areas for development include <b>Enhanced Fingerprinting</b>, <b>Bot Detection Heuristics</b>, and <b>Advanced Anti-Debugging</b> techniques.</p>
+                    <p style="font-size:0.85rem; color:var(--secondary-color); line-height:1.6;">Researchers can contribute by adding new detection modules. View our <a href="docs.html" style="color:var(--primary-color); font-weight:600;">Technical Documentation</a> for code samples and implementation details.</p>
                 </div>
             </div>
         </section>
