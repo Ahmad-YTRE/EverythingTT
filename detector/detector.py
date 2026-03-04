@@ -70,12 +70,20 @@ def scan_processes():
     return detected
 
 class ScannerHandler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, ngrok-skip-browser-warning')
+        self.end_headers()
+
     def do_GET(self):
         if self.path == '/scan':
             detected = scan_processes()
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*') # Allow browser access
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, ngrok-skip-browser-warning')
             self.end_headers()
             self.wfile.write(json.dumps(detected).encode())
         elif self.path == '/sessions':
@@ -88,18 +96,21 @@ class ScannerHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, ngrok-skip-browser-warning')
             self.end_headers()
             self.wfile.write(json.dumps(list(MONITORED_SESSIONS.values())).encode())
         elif self.path == '/clear_sessions':
             MONITORED_SESSIONS.clear()
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, ngrok-skip-browser-warning')
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({"status": "cleared"}).encode())
         elif self.path == '/ai_config':
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, ngrok-skip-browser-warning')
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
             config = {
@@ -126,6 +137,7 @@ class ScannerHandler(BaseHTTPRequestHandler):
             
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, ngrok-skip-browser-warning')
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({"status": "reported"}).encode())
@@ -197,16 +209,13 @@ class ScannerHandler(BaseHTTPRequestHandler):
                     elif event == 'prompt_submission':
                         print(f"   - Prompt: '{data.get('prompt')[:100]}...'")
                         print(f"   - Injected Payload: {data.get('injected_payload')}")
-                    elif event == 'ai_response_detected':
-                        print(f"   - AI Response: '{data.get('snippet')}'")
-                    else:
-                        print(f"   - Data: {json.dumps(data)}")
 
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, ngrok-skip-browser-warning')
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "captured", "stealth": is_stealth}).encode())
+            self.wfile.write(json.dumps({"status": "received"}).encode())
         else:
             self.send_response(404)
             self.end_headers()
