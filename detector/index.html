@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src *;">
-    <title>EverythingTT Security Research Center</title>
+    <title>EverythingTT Security & Protection Center</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>EverythingTT Security Research Center</h1>
-            <p>Official research hub for the EverythingTT project security system. Monitor, detect, and analyze browser-level interactions and environment states.</p>
+            <h1>EverythingTT Security & Protection Center</h1>
+            <p>Official protection hub for the EverythingTT project. Monitor, detect, and neutralize adversarial interactions and environment threats.</p>
             <div style="margin-top:1.5rem; display:flex; justify-content:center; gap:1.5rem; font-size:0.85rem;">
-                <a href="docs.html" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Developer Guide</a>
+                <a href="docs.html" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Technical Guide</a>
                 <a href="SECURITY.md" target="_blank" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Security Policy</a>
-                <a href="#card-injection" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Deployment Agent</a>
+                <a href="#card-injection" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Protection Agent</a>
             </div>
             
             <div id="c2-config" style="margin-top:2rem; padding:1rem; background:white; border-radius:12px; border:1px solid #e2e8f0; display:inline-block; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
@@ -143,22 +143,22 @@
                 <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
             </section>
 
-            <!-- AI Research & Prompt Injection Card -->
+            <!-- Adversarial Protection Hub (AI Monitoring) -->
             <section class="card" id="card-ai-research">
                 <div class="card-header">
                     <span class="icon">🤖</span>
-                    <h3>AI Research Hub</h3>
+                    <h3>Adversarial Protection Hub</h3>
                 </div>
                 <div class="status" id="status-ai">Monitoring</div>
                 <div class="description">
-                    <p>Detects interactions with AI platforms and simulates <strong>Prompt Injection</strong> research payloads.</p>
+                    <p>Detects interactions with AI platforms and injects <strong>Protection Payloads</strong> to neutralize attacker attempts.</p>
                     <ul class="info-list" style="margin-top:0.5rem; margin-bottom:1rem;">
-                        <li>Detects: ChatGPT, Claude, Gemini</li>
-                        <li>Monitors: Prompt input & submission</li>
-                        <li>Simulation: Automated payload injection</li>
+                        <li>Deterrence: Disrupts prompt injection and jailbreaks</li>
+                        <li>Protection: Injects security-first instructions</li>
+                        <li>Logging: Captures and reports adversarial attempts</li>
                     </ul>
                     <div style="padding:0.75rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
-                        <p style="font-size:0.7rem; color:var(--secondary-color); margin-bottom:0.5rem;"><strong>Research Status:</strong> Active across all monitored agents.</p>
+                        <p style="font-size:0.7rem; color:var(--secondary-color); margin-bottom:0.5rem;"><strong>Protection Status:</strong> Active across all monitored agents.</p>
                         <button onclick="window.location.href='#card-injection'" style="width:100%; padding:0.5rem; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600;">Manage Agents</button>
                     </div>
                 </div>
@@ -169,11 +169,11 @@
             <section class="card" id="card-e2ee">
                 <div class="card-header">
                     <span class="icon">🔐</span>
-                    <h3>E2EE Research</h3>
+                    <h3>E2EE Security</h3>
                 </div>
                 <div class="status" id="status-e2ee">Inactive</div>
                 <div class="description">
-                    <p style="margin-bottom:0.75rem;">Simulate <strong>End-To-End Encryption</strong> to test data privacy and man-in-the-middle resilience.</p>
+                    <p style="margin-bottom:0.75rem;">Test <strong>End-To-End Encryption</strong> to ensure data privacy and prevent man-in-the-middle attacks.</p>
                     <form onsubmit="event.preventDefault(); runE2EETest();" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
                         <input type="text" id="e2ee-message" placeholder="Message to encrypt..." style="padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem;">
                         <input type="password" id="e2ee-key" placeholder="Secret Key (min 8 chars)" autocomplete="current-password" style="padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem;">
@@ -324,15 +324,15 @@
 
             <section class="card" id="card-payload-manager">
                 <div class="card-header">
-                    <span class="icon">📜</span>
-                    <h3>Payload Manager</h3>
+                    <span class="icon">�️</span>
+                    <h3>Protection Payloads</h3>
                 </div>
                 <div class="status" id="status-payloads">Syncing...</div>
                 <div class="description">
-                    <p style="margin-bottom:0.75rem;">Manage the <strong>Research Payloads</strong> used for prompt injection simulations. These are automatically synced to active agents.</p>
+                    <p style="margin-bottom:0.75rem;">Manage the <strong>Protection Payloads</strong> used to disrupt attackers and skids. These are automatically synced to all active agents.</p>
                     
                     <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
-                        <input type="text" id="new-payload-input" placeholder="Enter new research payload..." style="flex:1; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem;">
+                        <input type="text" id="new-payload-input" placeholder="Enter new protection payload..." style="flex:1; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem;">
                         <button onclick="addNewPayload()" style="padding:0.5rem 1rem; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Add</button>
                     </div>
 
