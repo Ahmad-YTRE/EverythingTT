@@ -25,10 +25,17 @@
             <section class="card" id="card-devtools">
                 <div class="card-header">
                     <span class="icon">🔍</span>
-                    <h3>DevTools Killer</h3>
+                    <h3>DevTools Killer V2</h3>
                 </div>
                 <div class="status" id="status-devtools">Checking...</div>
-                <p class="description">Aggressively stalls DevTools. Persistent debugging triggers <strong>System Lockdown</strong>.</p>
+                <div class="description">
+                    <p>Aggressively stalls inspection via <strong>Recursive Debugger Traps</strong> and <strong>Latency Profiling</strong>.</p>
+                    <ul class="info-list" style="margin-top:0.5rem; font-size:0.7rem;">
+                        <li>Detection: Timing, Geometry, Console Latency</li>
+                        <li>Stalling: Self-invoking debugger loops</li>
+                        <li>Hardened: Prevents main-thread inspection</li>
+                    </ul>
+                </div>
             </section>
 
             <section class="card" id="card-incognito">

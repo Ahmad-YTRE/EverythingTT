@@ -16,29 +16,40 @@ let lockdownActive = false;
 let detectionCount = 0;
 
 // Aggressive "Killer" function: stalls DevTools by repeatedly triggering debugger
-// and using Function constructor to bypass some static analysis.
+// and using complex self-invoking structures to bypass simple "disable breakpoint" attempts.
 function killDevTools() {
     if (lockdownActive) return;
 
     const start = performance.now();
-    // Use debugger statement directly to avoid CSP issues with 'unsafe-eval'
-    (function() { debugger; })();
+    // Complex nested structure to make debugger harder to ignore
+    (function antiDebug(n) {
+        if (lockdownActive) return;
+        (function() {
+            (function() {
+                (function() {
+                    debugger;
+                }());
+            }());
+        }());
+        if (n > 0) antiDebug(n - 1);
+    }(0));
     const end = performance.now();
     
+    // If execution was stalled by more than 100ms, a breakpoint was hit
     if (end - start > 100) {
         detectionCount++;
-        logActivity(`Anti-debugging: stall #${detectionCount}`, 'alert');
+        logActivity(`Anti-debugging: stall detected (${Math.round(end - start)}ms) #${detectionCount}`, 'alert');
         
-        // If detected too many times (e.g., 5 times in a row), trigger lockdown
-        if (detectionCount > 5) {
+        // If detected too many times, trigger lockdown
+        if (detectionCount > 3) {
             triggerLockdown();
         } else {
-            // Keep stalling if open
-            setTimeout(killDevTools, 50);
+            // High frequency stalling if open
+            setTimeout(killDevTools, 20);
         }
     } else {
-        // Reset count if it's closed
-        detectionCount = 0;
+        // Decay detection count if it's closed
+        if (detectionCount > 0) detectionCount -= 0.5;
     }
 }
 
@@ -46,14 +57,23 @@ function triggerLockdown() {
     if (lockdownActive) return;
     lockdownActive = true;
     
+    // Attempt to clear all intervals to stop the page
+    let id = window.setTimeout(function() {}, 0);
+    while (id--) { window.clearTimeout(id); }
+    
     document.body.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#1e293b; color:#ef4444; font-family:sans-serif; text-align:center; padding:20px;">
-            <h1 style="font-size:3rem; margin-bottom:1rem;">EVERYTHINGTT SECURITY LOCKDOWN</h1>
-            <p style="font-size:1.2rem; margin-bottom:2rem;">Unauthorized inspection detected by the EverythingTT Security System. Access to this page has been revoked for security reasons.</p>
-            <button onclick="location.reload()" style="padding:12px 24px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Restart Session</button>
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#0f172a; color:#ef4444; font-family:'Fira Code', monospace; text-align:center; padding:40px; border: 10px solid #ef4444;">
+            <div style="font-size:5rem; margin-bottom:1rem;">⚠️</div>
+            <h1 style="font-size:2.5rem; margin-bottom:1rem; letter-spacing:-1px;">EVERYTHINGTT SECURITY LOCKDOWN</h1>
+            <div style="background:#1e293b; padding:20px; border-radius:12px; margin-bottom:2rem; text-align:left; max-width:600px; border-left:4px solid #ef4444;">
+                <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:10px;">// CRITICAL SECURITY VIOLATION DETECTED</p>
+                <p style="font-size:1.1rem; line-height:1.6;">Unauthorized inspection or persistent debugging detected. Access to the EverythingTT Research Center has been revoked to protect sensitive modules.</p>
+                <p style="color:#94a3b8; font-size:0.9rem; margin-top:10px;">// ERROR_CODE: ERR_HARDENED_INSPECTION_V2</p>
+            </div>
+            <button onclick="location.reload()" style="padding:14px 32px; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:800; text-transform:uppercase; transition:transform 0.2s;">Reset Research Session</button>
         </div>
     `;
-    logActivity('EVERYTHINGTT SYSTEM LOCKDOWN: Access revoked due to persistent debugging', 'alert');
+    logActivity('EVERYTHINGTT SYSTEM LOCKDOWN: Research environment hardened and access revoked', 'alert');
 }
 
 function detectDevTools() {
@@ -61,59 +81,68 @@ function detectDevTools() {
     
     const statusDevTools = document.getElementById('status-devtools');
     let detectedThisRound = false;
+    let method = "";
 
-    // Method 1: Timing check (debugger)
+    // Method 1: Performance/Timing check (debugger)
     const startTime = performance.now();
     (function() { debugger; })();
     if (performance.now() - startTime > 100) {
         detectedThisRound = true;
+        method = "Timing (Debugger)";
     }
 
-    // Method 2: Resize check (only if not full screen)
-    const threshold = 160;
-    const widthDiff = window.outerWidth - window.innerWidth;
-    const heightDiff = window.outerHeight - window.innerHeight;
-
-    if (widthDiff > threshold || heightDiff > threshold) {
-        detectedThisRound = true;
-    }
-
-    // Method 3: Trap on function toString (often triggered by DevTools inspection)
-    const func = function() {};
-    let toStringTriggered = false;
-    func.toString = function() {
-        toStringTriggered = true;
-        return 'trap';
-    };
-    // DevTools often calls toString on objects when inspecting
-    if (toStringTriggered) {
-        detectedThisRound = true;
-    }
-
-    // Method 3: Console formatters (Modern Chrome/Firefox)
-    const devtools = /./;
-    devtools.toString = function() {
-        detectedThisRound = true;
-        return 'devtools';
-    }
-    console.log(devtools);
-
-    // Method 4: Getter on object logged to console
-    const element = new Image();
-    Object.defineProperty(element, 'id', {
-        get: function() {
-            detectedThisRound = true;
-            return 'devtools-detector';
+    // Method 2: console.profile check (works in some browsers when tools are open)
+    if (!detectedThisRound) {
+        if (console.profile) {
+            console.profile();
+            console.profileEnd();
+            if (console.profiles && console.profiles.length > 0) {
+                detectedThisRound = true;
+                method = "Console Profile";
+            }
         }
-    });
-    console.log(element);
+    }
+
+    // Method 3: Resize check (high precision)
+    if (!detectedThisRound) {
+        const threshold = 160;
+        const widthDiff = Math.abs(window.outerWidth - window.innerWidth);
+        const heightDiff = Math.abs(window.outerHeight - window.innerHeight);
+        if (widthDiff > threshold || heightDiff > threshold) {
+            detectedThisRound = true;
+            method = "Window Geometry";
+        }
+    }
+
+    // Method 4: Element ID getter trap
+    if (!detectedThisRound) {
+        const div = document.createElement('div');
+        Object.defineProperty(div, 'id', {
+            get: () => {
+                detectedThisRound = true;
+                method = "DOM Inspection";
+                return 'ett-trap';
+            }
+        });
+        console.log(div);
+    }
+
+    // Method 5: console.table timing (extremely slow when tools are open)
+    if (!detectedThisRound) {
+        const tableStart = performance.now();
+        console.table([{a:1, b:2}]);
+        if (performance.now() - tableStart > 20) {
+            detectedThisRound = true;
+            method = "Console Table Latency";
+        }
+    }
 
     if (detectedThisRound) {
         if (!devtoolsOpen) {
             devtoolsOpen = true;
-            statusDevTools.textContent = 'DETECTED';
+            statusDevTools.textContent = `DETECTED (${method})`;
             statusDevTools.className = 'status negative';
-            logActivity('Developer Tools detected!', 'alert');
+            logActivity(`Developer Tools detected via ${method}!`, 'alert');
         }
     } else {
         if (devtoolsOpen) {
