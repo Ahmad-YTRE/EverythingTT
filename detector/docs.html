@@ -130,6 +130,7 @@
         <h2>EverythingTT Docs</h2>
         <ul class="sidebar-nav">
             <li><a href="#overview">Overview</a></li>
+            <li><a href="#deployment">Public Deployment</a></li>
             <li><a href="#devtools">DevTools Killer V2</a></li>
             <li><a href="#incognito">Incognito Detection</a></li>
             <li><a href="#monitoring">User Monitoring</a></li>
@@ -149,6 +150,27 @@
             <h1>Developer Guide</h1>
             <p>Welcome to the EverythingTT Security Research Center documentation. This guide is designed for developers and security researchers to understand the underlying mechanisms of our detection and monitoring modules.</p>
             <p>The system is built using a distributed architecture, combining a local Python C2 backend with advanced browser-level JavaScript modules.</p>
+        </section>
+
+        <section id="deployment" class="doc-section">
+            <span class="tag">OS Integration & Networking</span>
+            <h1>Public C2 Deployment</h1>
+            <p>To use the Security Research Center over the internet, you must expose the `detector.py` backend (port 8001) to a public URL.</p>
+            
+            <h2>Using ngrok (Recommended)</h2>
+            <p>The easiest way to make your local C2 server public without port forwarding is using <b>ngrok</b>.</p>
+            <pre><code># 1. Start your local C2 backend
+python detector.py
+
+# 2. Expose port 8001 to the internet
+ngrok http 8001</code></pre>
+            <p>Once ngrok provides a public URL (e.g., `https://random-id.ngrok-free.app`), enter it into the <b>C2 Server</b> input on the dashboard header. This will automatically update all injected agents and monitoring scripts.</p>
+
+            <h2>Manual Port Forwarding</h2>
+            <p>If you have access to your router, you can forward <b>TCP Port 8001</b> to your machine's local IP address. You can then use your public IP address or a Dynamic DNS (DDNS) hostname as your C2 URL.</p>
+            
+            <h2>Content Security Policy (CSP)</h2>
+            <p>To allow the dashboard to connect to your public C2 URL, the <code>connect-src</code> policy in <code>index.html</code> has been updated to <code>*</code> for research purposes. On a production system, you should restrict this to only your specific domain.</p>
         </section>
 
         <section id="devtools" class="doc-section">
