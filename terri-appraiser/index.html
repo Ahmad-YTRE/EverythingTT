@@ -789,6 +789,9 @@
                         <div id="res-name-tags" class="flex" style="flex-wrap: wrap; gap: 0.375rem;">
                             <!-- JS Badges -->
                         </div>
+                        <p class="text-slate-500" style="font-size: 7px; margin-top: 0.5rem; line-height: 1.4; font-style: italic;">
+                            * Bonuses require minimum account activity (5K Gold or Top 1000 Rank) and are subject to market demand.
+                        </p>
                     </div>
 
                     <div class="worth-badge prestige-badge">
@@ -1391,32 +1394,41 @@
          * - OG/Dictionary terms
          * 
          * @param {string} username 
+         * @param {number} gold - Required to prevent fresh accounts from abusing prestige
+         * @param {number} rank - Required to prevent fresh accounts from abusing prestige
          * @returns {Object} {total, badges}
          */
-        function calculateNamePrestige(username) {
+        function calculateNamePrestige(username, gold = 0, rank = 0) {
             if (!username) return { total: 0, badges: [] };
             
+            // ANTI-ABUSE: Accounts with negligible activity cannot claim prestige
+            const isActive = gold >= 5000 || (rank > 0 && rank <= 1000);
+            if (!isActive) return { total: 0, badges: [] };
+
             const coreName = username.split(' ')[0].replace(/[^a-zA-Z0-9]/g, '');
             let bonus = 0;
             let badges = [];
             const lowerName = coreName.toLowerCase();
 
-            if (coreName.length <= 3) {
-                bonus += 75.00;
+            // Strict checking: Legendary short must be at least 2 chars and CLEAN alpha to avoid "1" or "!" abuse
+            const isCleanAlpha = /^[a-zA-Z]+$/.test(coreName);
+
+            if (coreName.length >= 2 && coreName.length <= 3 && isCleanAlpha) {
+                bonus += 25.00;
                 badges.push({ text: "LEGENDARY SHORT", color: "#eab308", bg: "rgba(234, 179, 8, 0.2)" });
             } else if (coreName.length <= 5) {
-                bonus += 15.00;
+                bonus += 5.00;
                 badges.push({ text: "PREMIUM SHORT", color: "#94a3b8", bg: "rgba(148, 163, 184, 0.2)" });
             }
 
-            if (/^[a-zA-Z]+$/.test(coreName)) {
-                bonus += 15.00;
+            if (isCleanAlpha) {
+                bonus += 5.00;
                 badges.push({ text: "CLEAN ALPHA", color: "#10b981", bg: "rgba(16, 185, 129, 0.2)" });
             }
 
             const dictionary = ["money", "god", "king", "lord", "ace", "rich", "zero", "boss", "yegod", "og", "pro", "elite"];
             if (dictionary.includes(lowerName)) {
-                bonus += 45.00;
+                bonus += 15.00;
                 badges.push({ text: "DICTIONARY OG", color: "#6366f1", bg: "rgba(99, 102, 241, 0.2)" });
             }
 
@@ -1572,12 +1584,12 @@
 
                 const acc = data.account_data;
 
-                // Populate Correction Inputs with API Data
+                // Populate Correction Inputs with API Data (Correcting 0-indexed ranks from API to 1-indexed for UI)
                 document.getElementById('edit-gold').value = (acc.gold_cents / 100);
-                document.getElementById('edit-clan-rank').value = acc.clan_member_rank_a || 0;
+                document.getElementById('edit-clan-rank').value = (acc.clan_member_rank_a !== undefined) ? (acc.clan_member_rank_a + 1) : 0;
                 document.getElementById('edit-leader-pts').value = (acc.clan_leader_points / 10) || 0;
-                document.getElementById('edit-gold-rank').value = acc.gold_rank || 0;
-                document.getElementById('edit-admin-rank').value = acc.admin_rank || 0;
+                document.getElementById('edit-gold-rank').value = (acc.gold_rank !== undefined) ? (acc.gold_rank + 1) : 0;
+                document.getElementById('edit-admin-rank').value = (acc.admin_rank !== undefined) ? (acc.admin_rank + 1) : 0;
 
                 // Run Valuation
                 runAppraisal(acc.username);
@@ -1616,10 +1628,10 @@
              if (lastApiResponse && lastApiResponse.account_data) {
                  const original = lastApiResponse.account_data;
                  const originalGold = original.gold_cents / 100;
-                 const originalClanRank = original.clan_member_rank_a || 0;
+                 const originalClanRank = (original.clan_member_rank_a !== undefined) ? (original.clan_member_rank_a + 1) : 0;
                  const originalLeaderPts = (original.clan_leader_points / 10) || 0;
-                 const originalGoldRank = original.gold_rank || 0;
-                 const originalAdminRank = original.admin_rank || 0;
+                 const originalGoldRank = (original.gold_rank !== undefined) ? (original.gold_rank + 1) : 0;
+                 const originalAdminRank = (original.admin_rank !== undefined) ? (original.admin_rank + 1) : 0;
 
                  // Visual indicators for overrides (simple dot)
                  const showOverride = (current, orig, elId) => {
@@ -1645,7 +1657,7 @@
             const clanRankVal = calculateRankWorth(clanRank, 1.21, 17.99);
             const goldRankVal = calculateRankWorth(goldRank, 0.23, 39.99);
             const leaderPointsVal = leaderPts * 0.01;
-            const namePrestige = calculateNamePrestige(username);
+            const namePrestige = calculateNamePrestige(username, gold, clanRank || goldRank);
 
             const totalVal = goldInUSD + clanRankVal + goldRankVal + leaderPointsVal + namePrestige.total;
 
