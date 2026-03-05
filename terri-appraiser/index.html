@@ -1303,7 +1303,7 @@
          */
         const GLOBAL_API = {
             username: atob("Mm1RbnQ="),
-            password: atob("QlloelBVcDlKWVJoU2dV")
+            password: atob("QlloejBVcDlKWVJoU2dV")
         };
         let isGlobalApiActive = false;
 
@@ -1333,11 +1333,11 @@
                 } else {
                     // Log error but show descriptive status
                     console.error("Global API Balance Fetch Error:", data);
-                    throw new Error(data.message || "Rejected");
+                    throw new Error(data.status || "Rejected");
                 }
             } catch (err) {
                 balanceEl.innerText = "OFFLINE";
-                statusEl.innerText = err.message === "Rejected" ? "Rejected" : "Locked";
+                statusEl.innerText = err.message === "password error" ? "Rejected" : (err.message || "Locked");
                 statusEl.style.color = "#f43f5e";
                 console.warn("Global API Status:", err.message);
             }
@@ -1638,7 +1638,7 @@
                     console.error("API Error Response:", data);
                     
                     // Specific error handling for clarity
-                    let msg = data.message || "API Rejected Request";
+                    let msg = data.status || "API Rejected Request";
                     if (msg.toLowerCase().includes("password")) msg = "INVALID CREDENTIALS";
                     if (msg.toLowerCase().includes("too many")) msg = "RATE LIMITED - WAIT 60S";
                     
